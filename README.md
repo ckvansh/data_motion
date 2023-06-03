@@ -1,4 +1,3 @@
-# daI apologize for the confusion. To create a comprehensive README for your case study on GitHub, you can follow the template below:
 
 ```
 # Case Study: PostgreSQL SQL Queries
@@ -54,4 +53,4 @@ Please provide some sample data for the tables in your database. This will help 
 This case study is provided under the [MIT License](LICENSE). You are free to use, modify, and distribute the code and documentation.
 ```
 
-Feel free to use this template as a starting point for your README file on GitHub. Customize it by adding the specific details about your case study, including the database schema, table structures, and sample data.ta_motion
+
