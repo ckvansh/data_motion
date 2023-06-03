@@ -1,0 +1,101 @@
+USE tiny_toys_salesSELECT *
+FROM   customersSELECT *
+FROM   productsSELECT *
+FROM   ordersALTER TABLE customers DROP fullname
+-- q1. Which product has the highest price? Only return a single row.--SELECT *
+FROM   productsSELECT   product_name,
+         price
+FROM     products
+ORDER BY price DESC limit 1
+-- Which customer has made the most orders? --SELECT *
+FROM   ordersSELECT *
+FROM   customersSELECT   t.customer_id                                  AS customerid,
+                  Concat(t.first_name,' ', t.last_name) AS full_name,
+         Count(order_id)                                AS total_order
+FROM     (
+                SELECT c.customer_id,
+                       c.first_name,
+                       c.last_name,
+                       d.order_id
+                FROM   customers AS c
+                JOIN   orders    AS d
+                ON     c.customer_id = d.customer_id)t
+GROUP BY customerid
+ORDER BY total_order DESC limit 1
+-- What’s the total revenue per product? --SELECT *
+FROM   productsSELECT *
+FROM   order_itemsSELECT   p.product_name,
+         Sum(p.price*o.quantity) AS total_revenue
+FROM     products                AS p
+JOIN     order_items             AS o
+ON       p.product_id = o.product_id
+GROUP BY p.product_id
+ORDER BY total_revenue DESC
+-- Find the first order (by date) for each customer. --SELECT   customer_id,
+                  Concat(first_name,' ' ,last_name) AS fullname,
+         Min(order_date)                            AS `first ORDER date`
+FROM     customers
+JOIN     orders
+using   (customer_id)
+GROUP BY customer_id;
+
+-- Find the top 3 customers who have ordered the most distinct products. --WITH t AS
+(
+         SELECT   customer_id,
+                           Concat(first_name," ", last_name)             AS fullname,
+                  Count(DISTINCT product_id)                             AS 'No.of Distinct products',
+                  Rank() OVER (ORDER BY Count(DISTINCT product_id) DESC) AS `rank`
+         FROM     products
+         JOIN     order_items
+         using   (product_id)
+         join     orders
+         using   (order_id)
+         JOIN     customers
+         using   (customer_id)
+         GROUP BY customer_id )
+SELECT *
+FROM   t
+WHERE  `rank`=1;
+
+-- Which product has been bought the least in terms of quantity? --WITH t AS
+(
+         SELECT   product_name,
+                  Sum(quantity),
+                  Dense_rank() OVER (ORDER BY Sum(quantity) ) AS `rank`
+         FROM     products
+         JOIN     order_items
+         using   (product_id)
+         join     orders
+         using   (order_id)
+         GROUP BY product_id )
+SELECT *
+FROM   t
+WHERE  `rank`=1;
+
+/*9.For each order, determine if it was ‘Expensive’ (total over 300),
+‘Affordable’ (total over 100), or ‘Cheap’.*/SELECT   order_id,
+         Sum(price*quantity) AS Total,
+         CASE
+                  WHEN Sum(price*quantity)>300 THEN "expensive"
+                  WHEN Sum(price*quantity) >100 THEN "affordable"
+                  ELSE "cheap"
+         END AS Status
+FROM     orders
+JOIN     order_items
+using   (order_id)
+JOIN     products
+using   (product_id)
+GROUP BY order_id;#10.find customers who have ordered the product WITH the highest price.SELECT     customer_id,
+                      Concat(first_name, ' ', last_name) AS FullName,
+           price
+FROM       customers
+INNER JOIN orders
+using     (customer_id)
+INNER JOIN order_items
+using     (order_id)
+INNER JOIN products
+using     (product_id)
+WHERE      price =
+           (
+                  SELECT Max(price)
+                  FROM   products)
